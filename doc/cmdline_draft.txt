@@ -1,0 +1,28 @@
+CLI of pv
+=========
+
+Usage: pv [--mode|-m] [--size|-s <WxH>] [filename|directory]
+
+Invocation without parameters: display images in directory as a slideshow (can be navigated with cursor buttons)
+
+	--mode | -m: Set mode.
+		Possible values:
+			fullscreen: show images in fullscreen.
+			window: show images in a window. This is the default.
+
+	--size | -s <WxH>: Set window size. Default is 640x480. Ignored when fullscreen mode is set.
+		
+
+Examples:
+	Display an image:
+		pv ./image.jpg
+
+	Display images in a directory with as a slideshow:
+		pv --mode fullscreen ~/Pictures
+
+	Display images in the current directory as a slideshow in a 640x480 window:
+		pv
+
+
+
+
