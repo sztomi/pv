@@ -7,12 +7,11 @@
 #include <iostream>
 #include <exception>
 
-#define log(x) std::cout << #x << std::endl
 
 using std::vector;
 using std::string;
-using std::map;
-
+using std::multimap;
+using std::pair;
 namespace pv 
 {
 
@@ -27,7 +26,7 @@ class CliParser
 {
 private:
 	vector<string> args;
-	map<string, string> options_args;
+	multimap<string, string> options_args;
 
 	CliParser() {}
 	CliParser(const CliParser& c) {}
@@ -35,6 +34,9 @@ private:
 	enum parser_state { WHITESPACE, ARGUMENT, SHORTOPT, LONGOPT,
 						SHORTOPT_WAIT, LONGOPT_WAIT, OPT_READ, ERROR };
 
+	/**
+	 * State-machine to parse the input. It populates options_args.
+	 */
 	void parse()
 	{
 		parser_state state = WHITESPACE;
@@ -44,27 +46,23 @@ private:
 
 		for( ; it != args.end(); ++it )
 		{
-			std::cout << *it << std::endl;
 			for ( int i = 0; i < (*it).length(); ++i )
 			{
 				switch ( state )
 				{
 				case WHITESPACE:
-					log(WHITESPACE);
 					if ( (*it)[i] == '-' )		state = SHORTOPT_WAIT;
 					else if ( isspace( (*it)[i] ) )	state = WHITESPACE;
 					else state = ARGUMENT;
 				continue;
 
 				case SHORTOPT_WAIT:		
-					log(SHORTOPT_WAIT);
 					if ( (*it)[i] == '-' )			state = LONGOPT_WAIT;
 					else if ( isspace( (*it)[i] ) )	state = ERROR;
 					else							state = SHORTOPT;
 				continue;
 
 				case SHORTOPT:
-					log(SHORTOPT);
 					if ( !isspace( (*it)[i] ) )	state = ERROR;
 					else
 					{
@@ -74,7 +72,6 @@ private:
 				continue;
 
 				case LONGOPT_WAIT:
-					log(LONGOPT_WAIT);
 					if ( (*it)[i] == '-' || isspace( (*it)[i] ) )	state = ERROR;
 					else
 					{
@@ -83,7 +80,6 @@ private:
 				continue;
 
 				case LONGOPT:
-					log(LONGOPT);
 					if ( isspace( (*it)[i] ) )
 					{
 						last_opt = (*it);
@@ -92,10 +88,9 @@ private:
 				continue;
 
 				case OPT_READ:
-					log(OPT_READ);
 					if ( (*it)[i] == '-' )
 					{
-						options_args[last_opt] = "";
+						options_args.insert( pair<string, string>(last_opt, "") );
 						last_opt = "";
 						state = SHORTOPT_WAIT;
 					}
@@ -104,10 +99,9 @@ private:
 				continue;
 
 				case ARGUMENT:
-					log(ARGUMENT);
 					if ( isspace( (*it)[i] ) )
 					{
-						options_args[last_opt] = (*it);
+						options_args.insert( pair<string, string>(last_opt, *it) );
 						last_opt = "";
 						state = WHITESPACE;
 					}
@@ -115,7 +109,6 @@ private:
 				continue;
 
 				case ERROR:
-					log(ERROR);
 					// throw new parser_exception("A ló meghal, a madarak kirepülnek");
 					throw parser_exception();
 				break;
@@ -135,7 +128,7 @@ private:
 			}
 			else if ( state == ARGUMENT )
 			{
-				options_args[last_opt] = (*it);
+				options_args.insert( pair<string, string>(last_opt, *it) );
 				last_opt = "";
 				state = WHITESPACE;
 			}
@@ -165,7 +158,7 @@ public:
 
 	void display()
 	{
-		for ( map<string, string>::iterator it = options_args.begin();
+		for ( multimap<string, string>::iterator it = options_args.begin();
 			  it != options_args.end();
 			  ++it
 			)
