@@ -12,6 +12,7 @@ using std::vector;
 using std::string;
 using std::multimap;
 using std::pair;
+
 namespace pv 
 {
 
@@ -165,6 +166,27 @@ public:
 		{
 			std::cout << "[" << it->first << "] = " << "'" << it->second << "'" << std::endl;
 		}
+
+	}
+
+	/**
+	 * Returns the argument of the specified option.
+	 * @param opt The option.
+	 * @return The argument associated with the option.
+	 */
+	string getArgument(string opt)
+	{
+		multimap<string, string>::iterator it;
+		return options_args.find(opt)->second;
+	}
+
+	/**
+	 * Checks if an option is presented in the given commandline.
+	 * @param opt The option.
+	 * @return True, if the option can be found.
+	 */
+	bool isOptPresent(string opt)
+	{
 
 	}
 };
